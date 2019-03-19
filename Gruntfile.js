@@ -370,8 +370,8 @@ module.exports = function(grunt) {
 		'testconfig',
 		'fixture',
 		'connect',
-		'mocha',
-		'parallel'
+		// 'mocha',
+		'test-webdriver:ie'
 	]);
 
 	grunt.registerTask('ci-build', [
