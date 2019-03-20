@@ -292,8 +292,11 @@ testUtils.queryFixture = function queryFixture(html, query) {
  * @param {Object} navigator The navigator object of the current browser
  * @return {boolean}
  */
+// eslint-disable-next-line no-unused-vars
 testUtils.isIE11 = (function isIE11(navigator) {
-	return navigator.userAgent.indexOf('Trident/7') !== -1;
+	// return navigator.userAgent.indexOf('Trident/7') !== -1;
+	// Always run IE tests for this branch to demonstrate failures
+	return false;
 })(navigator);
 
 axe.testUtils = testUtils;

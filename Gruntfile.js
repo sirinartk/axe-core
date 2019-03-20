@@ -363,14 +363,15 @@ module.exports = function(grunt) {
 		'aria-supported'
 	]);
 
+	// Have this task ONLY run IE test to demonstrate failures
 	grunt.registerTask('test', [
 		'build',
 		'file-exists',
 		'testconfig',
 		'fixture',
 		'connect',
-		'mocha',
-		'parallel'
+		// 'mocha',
+		'test-webdriver:ie'
 	]);
 
 	grunt.registerTask('ci-build', [
