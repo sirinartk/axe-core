@@ -1,5 +1,20 @@
+/**
+ * NOTE:
+ * `document.styleSheets` does not recognize dynamically injected stylesheets after `load` via `beforeEach`/ `before`,
+ * so tests for disabled and external stylesheets are done in `integration` tests
+ * Refer Directory: `./test/full/preload-cssom/**.*`
+ */
+
 describe('axe.utils.preloadCssom unit tests', function() {
 	'use strict';
+
+	var isPhantom = window.PHANTOMJS ? true : false;
+
+	before(function() {
+		if (isPhantom) {
+			this.skip(); // if `phantomjs` -> skip `suite`
+		}
+	});
 
 	var args;
 
@@ -37,18 +52,17 @@ describe('axe.utils.preloadCssom unit tests', function() {
 		assert.isFunction(axe.utils.preloadCssom);
 	});
 
-	it('should return a queue', function() {
+	it('should return a Promise', function() {
 		var actual = axe.utils.preloadCssom(args);
-		assert.isObject(actual);
-		assert.containsAllKeys(actual, ['then', 'defer', 'catch']);
+		assert.isTrue(
+			Object.prototype.toString.call(actual) === '[object Promise]'
+		);
 	});
 
 	it('should ensure result of cssom is an array of sheets', function(done) {
 		var actual = axe.utils.preloadCssom(args);
 		actual
-			.then(function(results) {
-				// returned from queue, hence the index look up
-				var cssom = results[0];
+			.then(function(cssom) {
 				assert.isAtLeast(cssom.length, 2);
 				done();
 			})
@@ -60,16 +74,14 @@ describe('axe.utils.preloadCssom unit tests', function() {
 	it('ensure that each of the cssom object have defined properties', function(done) {
 		var actual = axe.utils.preloadCssom(args);
 		actual
-			.then(function(results) {
-				// returned from queue, hence the index look up
-				var cssom = results[0];
+			.then(function(cssom) {
 				assert.isAtLeast(cssom.length, 2);
 				cssom.forEach(function(o) {
 					assert.hasAllKeys(o, [
 						'root',
 						'shadowId',
 						'sheet',
-						'isExternal',
+						'isCrossOrigin',
 						'priority'
 					]);
 				});
@@ -83,8 +95,8 @@ describe('axe.utils.preloadCssom unit tests', function() {
 	it('should fail if number of sheets returned does not match stylesheets defined in document', function(done) {
 		var actual = axe.utils.preloadCssom(args);
 		actual
-			.then(function(results) {
-				assert.isFalse(results[0].length <= 1); // returned from queue, hence the index look up
+			.then(function(cssom) {
+				assert.isFalse(cssom.length <= 1);
 				done();
 			})
 			.catch(function(error) {
@@ -95,9 +107,8 @@ describe('axe.utils.preloadCssom unit tests', function() {
 	it('should ensure all returned stylesheet is defined and has property cssRules', function(done) {
 		var actual = axe.utils.preloadCssom(args);
 		actual
-			.then(function(results) {
-				var sheets = results[0];
-				sheets.forEach(function(s) {
+			.then(function(cssom) {
+				cssom.forEach(function(s) {
 					assert.isDefined(s.sheet);
 					assert.property(s.sheet, 'cssRules');
 				});
@@ -107,9 +118,4 @@ describe('axe.utils.preloadCssom unit tests', function() {
 				done(error);
 			});
 	});
-
-	/**
-	 * NOTE: document.styleSheets does not recognise dynamically injected stylesheets after load via beforeEach/ before, so tests for disabled and external stylesheets are done in integration
-	 * Refer Directory: ./test/full/preload-cssom/**.*
-	 */
 });
