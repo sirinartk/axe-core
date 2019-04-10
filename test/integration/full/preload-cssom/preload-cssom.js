@@ -6,6 +6,7 @@ describe('preload cssom integration test', function() {
 	var shadowSupported = axe.testUtils.shadowSupport.v1;
 	var isPhantom = window.PHANTOMJS ? true : false;
 	var isIE11 = axe.testUtils.isIE11;
+	var isWindowsOS = axe.testUtils.isWindowsOS;
 
 	var styleSheets = [
 		{
@@ -376,18 +377,22 @@ describe('preload cssom integration test', function() {
 			frame = document.getElementById('frame1').contentDocument;
 		});
 
-		it('should return inline stylesheets defined using <style> tag', function(done) {
-			getPreload(frame)
-				.then(function(results) {
-					var sheets = results[0];
-					var nonExternalsheets = sheets.filter(function(s) {
-						return !s.isExternal;
-					});
-					assert.lengthOf(nonExternalsheets, 1);
-					done();
-				})
-				.catch(done);
-		});
+		// Flaky Test: Occasionally fails in Chrome on Windows
+		(isWindowsOS ? it.skip : it)(
+			'should return inline stylesheets defined using <style> tag',
+			function(done) {
+				getPreload(frame)
+					.then(function(results) {
+						var sheets = results[0];
+						var nonExternalsheets = sheets.filter(function(s) {
+							return !s.isExternal;
+						});
+						assert.lengthOf(nonExternalsheets, 1);
+						done();
+					})
+					.catch(done);
+			}
+		);
 
 		commonTestsForRootAndFrame(frame);
 	});

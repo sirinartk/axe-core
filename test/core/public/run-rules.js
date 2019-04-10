@@ -2,8 +2,10 @@
 describe('runRules', function() {
 	'use strict';
 
+	var isIE11 = axe.testUtils.isIE11;
+
 	// These tests can sometimes be flaky in IE, allow for up to 3 retries
-	if (axe.testUtils.isIE11) {
+	if (isIE11) {
 		this.retries(3);
 	}
 
@@ -649,56 +651,60 @@ describe('runRules', function() {
 		});
 	});
 
-	it('should resolve to cantTell if an error occurs inside frame rules', function(done) {
-		axe._load({
-			rules: [
-				{
-					id: 'incomplete-1',
-					selector: '.nogo',
-					none: ['undeffed']
-				},
-				{
-					id: 'incomplete-2',
-					selector: '.nogo',
-					none: ['thrower']
-				}
-			],
-			checks: [
-				{
-					id: 'undeffed',
-					evaluate: function() {
-						return false;
+	// Flaky Test: Frequently fails in IE
+	(isIE11 ? it.skip : it)(
+		'should resolve to cantTell if an error occurs inside frame rules',
+		function(done) {
+			axe._load({
+				rules: [
+					{
+						id: 'incomplete-1',
+						selector: '.nogo',
+						none: ['undeffed']
+					},
+					{
+						id: 'incomplete-2',
+						selector: '.nogo',
+						none: ['thrower']
 					}
-				},
-				{
-					id: 'thrower',
-					evaluate: function() {
-						return false;
+				],
+				checks: [
+					{
+						id: 'undeffed',
+						evaluate: function() {
+							return false;
+						}
+					},
+					{
+						id: 'thrower',
+						evaluate: function() {
+							return false;
+						}
 					}
+				]
+			});
+
+			iframeReady(
+				'../mock/frames/rule-error.html',
+				fixture,
+				'context-test',
+				function() {
+					axe.run('#fixture', function(err, results) {
+						assert.isNull(err);
+						assert.lengthOf(results.incomplete, 2);
+						assert.equal(results.incomplete[0].id, 'incomplete-1');
+						assert.equal(results.incomplete[1].id, 'incomplete-2');
+
+						assert.include(
+							results.incomplete[1].description,
+							'An error occured while running this rule'
+						);
+						done();
+					});
 				}
-			]
-		});
-
-		iframeReady(
-			'../mock/frames/rule-error.html',
-			fixture,
-			'context-test',
-			function() {
-				axe.run('#fixture', function(err, results) {
-					assert.isNull(err);
-					assert.lengthOf(results.incomplete, 2);
-					assert.equal(results.incomplete[0].id, 'incomplete-1');
-					assert.equal(results.incomplete[1].id, 'incomplete-2');
-
-					assert.include(
-						results.incomplete[1].description,
-						'An error occured while running this rule'
-					);
-					done();
-				});
-			}
-		);
-	});
+			);
+		}
+	);
 
 	it('should cascade `no elements found` errors in frames to reject run_rules', function(done) {
 		axe._load({
