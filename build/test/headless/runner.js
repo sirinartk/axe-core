@@ -16,7 +16,7 @@ const runner = async options => {
 			ignoreHTTPSErrors: true
 		};
 		const browser = await puppeteer.launch(puppeteerOptions);
-		const page = await browser.newPage();
+		const [page] = await browser.pages();
 
 		page.on('console', consoleToStdOut);
 		page.on('pageerror', err => reject(err));
@@ -27,9 +27,18 @@ const runner = async options => {
 			timeout: 300000
 		});
 
-		const response = await page.evaluate(() => window.__mochaResult__);
-		await browser.close();
-		resolve(response);
+		const { result } = await page.evaluate(() => window.__mochaResult__);
+		const { stats } = result;
+		// Print failures, if any
+		if (stats.failures > 0) {
+			console.log(`Failures: ${stats.failures}\n`);
+			console.log(`url: ${options.url}\n`);
+			result.failures.forEach(test => {
+				console.log(JSON.stringify(test, undefined, 2));
+			});
+		}
+		browser.close();
+		resolve();
 	});
 };
 

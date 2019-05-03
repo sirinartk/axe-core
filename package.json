@@ -115,6 +115,7 @@
 		"minami": "^1.2.3",
 		"mkdirp": "^0.5.1",
 		"mocha": "^6.1.2",
+		"p-limit": "^2.2.0",
 		"prettier": "^1.17.0",
 		"puppeteer": "^1.15.0",
 		"retire": "^2.0.1",

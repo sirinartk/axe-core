@@ -1,4 +1,4 @@
-// const globby = require('globby');
+const globby = require('globby');
 
 const getTestFiles = async () => {
 	const host = `localhost`;
@@ -23,16 +23,13 @@ const getTestFiles = async () => {
 		);
 	}
 
-	// const integrationFiles = await globby(integrationFileGlobs);
+	const integrationFiles = await globby(integrationFileGlobs);
 
-	// const integrationTestFiles = integrationFiles.map(file => {
-	//   return `http://${host}:${port}/${file}`;
-	// });
+	const integrationTestFiles = integrationFiles.map(file => {
+		return `http://${host}:${port}/${file}`;
+	});
 
-	return [
-		...unitTestFiles
-		// ...integrationTestFiles
-	];
+	return [...unitTestFiles, ...integrationTestFiles];
 };
 
 module.exports = getTestFiles;
