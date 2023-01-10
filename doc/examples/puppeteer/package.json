@@ -8,6 +8,6 @@
 	},
 	"dependencies": {
 		"axe-core": "^3.2.2",
-		"puppeteer": "^1.6.0"
+		"puppeteer": "^3.0.0"
 	}
 }
